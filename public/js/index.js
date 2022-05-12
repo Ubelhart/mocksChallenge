@@ -31,33 +31,69 @@ function addProducts() {
   socket.emit("new-products", newProduct);
 }
 
-function renderMessage(messages) {
+function renderMessage(posts) {
   const authorSchema = new normalizr.schema.Entity(
     "authors",
     {},
     { idAttribute: "email" }
   );
 
-  const messageSchema = new normalizr.schema.Entity(
-    "messages",
-    {},
+  const postSchema = new normalizr.schema.Entity(
+    "post",
+    {
+      author: authorSchema,
+    },
     { idAttribute: "_id" }
   );
 
-  const postSchema = new normalizr.schema.Entity("post", {
-    author: authorSchema,
-    post: messageSchema,
-  });
+  const postsSchema = new normalizr.schema.Entity(
+    "posts",
+    { messages: [postSchema] },
+    { idAttribute: "_id" }
+  );
 
-  const normalizedData = normalizr.normalize(messages, postSchema);
-  console.log(normalizedData);
-  const html = normalizedData.result
-    .map((elem) => {
+  const normalizedData = normalizr.normalize(posts, postsSchema);
+  const denormalizedData = normalizr.denormalize(
+    normalizedData.result,
+    postsSchema,
+    normalizedData.entities
+  );
+
+  const postsLength = JSON.stringify(posts).length;
+  const normalizedDataLength = JSON.stringify(normalizedData).length;
+
+  const compression = (normalizedDataLength / postsLength) * 100;
+
+  console.log(
+    "---------------------------- OBJETO ORIGINAL ----------------------------------"
+  );
+  console.log(posts, postsLength);
+
+  console.log(
+    "\n",
+    "---------------------------- OBJETO NORMALIZADO ------------------------------"
+  );
+  console.log(normalizedData, normalizedDataLength);
+  console.log(`Porcentaje de compresión ${Math.round(compression)}%`);
+
+  console.log(
+    "\n",
+    "---------------------------- OBJETO DENORMALIZADO ----------------------------"
+  );
+  console.log(JSON.stringify(denormalizedData).length);
+
+  document.getElementById(
+    "compression"
+  ).innerText = `Centro de Mensajes(Compresión: ${Math.round(compression)}%)`;
+
+  const html = posts.messages
+    .map((post) => {
+      const { author } = post;
       return `<div>
-        <strong class="email">${elem.email}</strong>
-        <em class="date">[${elem.date}]</em>:
-        <em class="text">${elem.message}</em> </div>
-        <img src="${elem.avatar}"></img>`;
+        <strong class="email">${author.email}</strong>
+        <em class="date">[${post.date}]</em>:
+        <em class="text">${post.message}</em> </div>
+        <img src="${author.avatar}"></img>`;
     })
     .join(" ");
   document.getElementById("messages").innerHTML = html;
@@ -81,11 +117,7 @@ function addMessage() {
       alias: document.getElementById("alias").value,
       avatar: document.getElementById("avatar").value,
     },
-    messages: [
-      {
-        message: document.getElementById("message").value,
-      },
-    ],
+    message: document.getElementById("message").value,
   };
 
   socket.emit("new-message", newMessage);

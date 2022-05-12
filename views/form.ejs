@@ -39,10 +39,10 @@
           </tbody>
         </thead>
       </table>
-      <h2>Centro de Mensajes</h2>
-    <div id="messages"></div>
 
-    <form onsubmit="addMessage()" id="chat">
+      <h2 id="compression"></h2>
+
+      <form onsubmit="addMessage()" id="chat">
         <input type="email" id="email" placeholder="Tu Email" >
         <br/>
         <input type="text" id="name" placeholder="Tu Nombre" >
@@ -58,7 +58,9 @@
         <input type="text" id="message" placeholder="Cuéntanos algo...">
         <br/>
         <input type="submit" value="Enviar">
-    </form>
+      </form>
+
+      <div id="messages"></div>
 
     </main>
   </body>

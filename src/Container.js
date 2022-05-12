@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Message = require("./models/messages");
+const Posts = require("./models/posts");
 const Product = require("./models/products");
 const mongoDbKey = require("../options/mongoDb");
 
@@ -41,25 +41,24 @@ class ContainerMessages extends Container {
 
   async getDataBaseMessages() {
     try {
-      const messages = await Message.find({});
+      const messages = await Posts.findById("messages");
       return messages;
     } catch (error) {
       console.log(error);
     }
   }
 
-  async insertMessage(message) {
-    const check = await Message.findOneAndUpdate(
-      { author: message.author },
-      {
-        messages: { $push: { message: message.messages[0].message } },
-      }
+  async insertMessage(post) {
+    const posts = await Posts.findByIdAndUpdate(
+      { _id: "messages" },
+      { $push: { messages: post } },
+      { new: true }
     );
-    if (!check) {
-      const newMessage = new Message(message);
+    if (!posts) {
+      const newMessage = new Posts({ messages: [post] });
       return await newMessage.save();
     }
-    return check;
+    return posts;
   }
 }
 

@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const util = require("util");
 
 const { Server: HttpServer } = require("http");
 const httpServer = new HttpServer(app);
@@ -8,8 +9,6 @@ const { Server: IOServer } = require("socket.io");
 const io = new IOServer(httpServer);
 
 const { faker } = require("@faker-js/faker");
-const { normalize, schema } = require("normalizr");
-const denormalize = normalize.denormalize;
 
 const { containerMessages, containerProducts } = require("./Container");
 
